@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Arcade Bidder</title>
+    <style>
+      body { font: 26px Helvetica, Arial; }
+      button { font: 46px Helvetica, Arial; margin: 4px; }
+      input {font-size: 26px}
+      .column {
+        float: left;
+          width: 50%;
+
+      }
+    </style>
+
+    <script>
+      // just putting comments here, since css comments crap out...
+
+      // div.column {
+      //   -webkit-column-count: 3; /* Chrome, Safari, Opera */
+      //   -moz-column-count: 3; /* Firefox */
+      //   column-count: 3;
+      // }
+    </script>
+    
+  </head>
+  <body>
+    
+
+    <div class=column>
+      <p>hello lobby</p>
+      <!--<button id="create_room" >Create Room</button>
+      <button>Leave Room</button>-->
+
+
+      <button id="btnCreateRoom">Create Room</button>
+
+      <br>
+      roomID:<br>
+      <input id="inputRoomID" type="text"><br>
+
+      <button id="btnJoinRoom">Join Room</button><br>
+      <button id="btnStartGame">Start Game</button><br>
+      <button id="btnLeaveRoom">Leave Room</button>
+      
+      <button id="btnDebug">Debug</button>
+
+    </div>
+
+
+    <div class=column>
+      <p>hello game</p>
+      <input id="inputBidAmount" type="text"><br>
+      <button id="btnBid">Bid</button>
+
+    </div>
+
+
+
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+  <script src="app.js"></script>
+
+
+  <script>
+  
+  </script>
+
+  </body>
+</html>

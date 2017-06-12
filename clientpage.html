@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Real time game</title>
+      
+        <script src="./game/wdf.js"> 
+        </script>
+        <script type="text/javascript">
+    /*        window.onload = function() {
+
+                var welcome = document.getElementById("welcome");
+                var allUsers = document.getElementById("users");
+                var progress = document.getElementById("progress");
+                var results = document.getElementById("results");
+
+                var socket = io.connect('http://localhost:3250');
+                socket.on('welcome', function (data) {
+                    console.log(data);
+                    welcome.innerHTML = "Welcome to the game <strong>" + data.name + "</strong>";
+                });
+                socket.on('users', function (data) {
+                    allUsers.innerHTML = "<strong>Users:</strong>" + data.users;
+                });
+                socket.on('update', function (data) {
+                    progress.innerHTML = data.currentWidth;
+                    progress.style.width = parseInt(data.currentWidth) + "px";
+                });
+                socket.on('win', function (data) {
+                    results.innerHTML = data.message;
+                });
+
+                progress.onclick = function() {
+                    socket.emit("click");
+                }
+
+            }*/
+        </script>
+    </head>
+    <body class="main">
+        <script> 
+        //Test game
+        var game = new Game(null, {
+                startingMoney:100,
+                objectValues:[5,2,3],
+                bidHandler:1,
+                observerHandler:1,
+                maxCountDownSec:15
+             }, 555, [
+            { username:"alice", uniqueID:"111", socket:{} } , 
+            { username:"bob", uniqueID:"1112", socket:{} } ]);
+
+        </script>
+    </body>
+</html>

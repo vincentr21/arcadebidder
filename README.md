@@ -1,2 +1,1 @@
-# arcadebidder
-Arcade Bidder multiplayer web game
+Arcade Bidder 2017

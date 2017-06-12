@@ -1,0 +1,64 @@
+[
+    {
+        "name" : "IXShoes",
+        "desc" : "nice kIX",
+        "url": "public/shoes.png",
+        "victoryPts": 6
+    },
+
+    {
+        "name" : "Peter's Shoes",
+        "desc" : "sick shoes",
+        "url": "public/petershoes.png",
+        "victoryPts": 6
+    },
+    {
+        "name" : "Charmander plushie",
+        "desc" : "that's hot",
+        "url": "public/charmander.png",
+        "victoryPts": 6
+    },
+
+    {
+        "name" : "Peter's Shoes",
+        "desc" : "sick shoes",
+        "url": "public/petershoes.png",
+        "victoryPts": 6
+    },    {
+        "name" : "IXShoes",
+        "desc" : "nice kIX",
+        "url": "public/shoes.png",
+        "victoryPts": 6
+    },
+
+    {
+        "name" : "Peter's Shoes",
+        "desc" : "sick shoes",
+        "url": "public/petershoes.png",
+        "victoryPts": 6
+    },    {
+        "name" : "IXShoes",
+        "desc" : "nice kIX",
+        "url": "public/shoes.png",
+        "victoryPts": 11
+    },
+
+    {
+        "name" : "Peter's Shoes",
+        "desc" : "sick shoes",
+        "url": "public/petershoes.png",
+        "victoryPts": 11
+    },    {
+        "name" : "IXShoes",
+        "desc" : "nice kIX",
+        "url": "public/shoes.png",
+        "victoryPts": 11
+    },
+
+    {
+        "name" : "Masterball",
+        "desc" : "catches pandicorns",
+        "url": "public/masterball.png",
+        "victoryPts": 31
+    }
+]
