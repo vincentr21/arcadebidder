@@ -1,6 +1,7 @@
 import { AuctionObject } from './AuctionObject';
 import {Campaign} from './Campaign'
 import {Requirement} from './Requirement'
+import {IAbility} from './Ability'
 export class Player {
 	private money:number;
 	private victoryPts:number;
@@ -9,6 +10,7 @@ export class Player {
 	private wonObjects:AuctionObject[];
 	private socket:object;
 	private campaigns:Campaign[];
+	private abilities:IAbility[];
 
 	constructor (uniqueID:string, name:string, money:number, socket:object) {
 		this.username = name;
@@ -16,12 +18,18 @@ export class Player {
 		this.victoryPts = 0;
 		this.money = money;
 		this.socket = socket;
+		this.abilities = [];
 		this.reset();
 	}
 
 	public reset() {
 		this.wonObjects = [];
-		this.campaigns = []
+		this.campaigns = [];
+		for(var i = this.abilities.length - 1; i >= 0 ; i--){
+			if(!this.abilities[i].isPermanent()){
+				this.abilities.splice(i, 1);
+			}
+		}
 	}
 
 	public addVP(vp:number) {
@@ -47,6 +55,10 @@ export class Player {
 	addObject(obj:AuctionObject):void {
 		this.wonObjects.push(obj);
 		//this.victoryPts += obj.getValue();
+	}
+
+	addAbility(ability:IAbility) {
+		this.abilities.push(ability);
 	}
 
 	canPay(bid:number):boolean {

@@ -22,6 +22,8 @@ export interface IAuctionItem {
 
 export class Game {
 	
+	private SHOULD_LOG = true;
+
 	// // CREATING GAME ROOM/LOBBY
 	// private startingMoney:number;
 	// private objectValues:number[];
@@ -34,7 +36,7 @@ export class Game {
 	//Game details
 	private players:Player[];
 	private currentRound:number;
-	private AuctionObjects:AuctionObject[];
+	private auctionObjects:AuctionObject[];
 
 	//Round details.
 	private maxBidTimeMS = 15000;
@@ -57,7 +59,7 @@ export class Game {
 		this.maxBidTimeMS = config.maxCountdownSec * 1000;
 		this.socketHandler = socketHandler;
 		this.players = [];
-		this.AuctionObjects = [];
+		this.auctionObjects = [];
 		this.playerBids = [];
 		
 
@@ -70,7 +72,7 @@ export class Game {
 			this.bidHandler = HardcoreBidModeHandler;
 		} else {
 			this.bidHandler = FirstPriceBidModeHandler;
-			console.log("what the invalid bid mode");
+			this.log("what the invalid bid mode");
 		}
 
 		if (config.visibilityMode === VISIBILITY_MODE_STANDARD) {
@@ -79,12 +81,12 @@ export class Game {
 			this.visibilityHandler = GoogleVisibilityHandler;
 		} else {
 			this.visibilityHandler = StandardVisibilityHandler;
-			console.log("invalid visibility mode");
+			this.log("invalid visibility mode");
 		}
 
 		this.currentRound = 0;
 		for (let val of config.objectValues) {
-			this.AuctionObjects.push(this.generateAuctionObj(val));
+			this.auctionObjects.push(this.generateAuctionObj(val));
 		}
 
 		for (let playerData of joinedPlayers) {
@@ -101,15 +103,19 @@ export class Game {
 			this.finishGame();
 			return;
 		}
+		this.log("Season begin.");
 		this.beginCampaignRound(0);
 	}
 
 	private finishSeason() {
+		this.log("Season end.");
 		// TODO PUNISH CAMPAIGN FAILURES
 		this.beginSeason();
 	}
 
 	private beginCampaignRound(currentPlayerCampaignSelect:number) {
+
+		this.log("Begin Campaign round.")
 		this.campaigns = [];
 		this.playerCampaignStatuses = [];
 		this.currentPlayerCampaignSelect = currentPlayerCampaignSelect; // Maybe smarter logic.
@@ -125,6 +131,7 @@ export class Game {
 	}
 
 	private endCampaignRound() {
+		this.log("End Campaign round.")
 		this.beginAuctionRound();
 	}
 
@@ -173,15 +180,17 @@ export class Game {
 	//Round setup========================================
 	private nextAuctionRound():void {
 		this.currentRound++;
-		if (this.currentRound >= this.AuctionObjects.length) {
+		if (this.currentRound >= this.auctionObjects.length) {
 			this.finishSeason();
 			return;
 		}
+		
 		this.beginAuctionRound();
 	}
 
 	private beginAuctionRound():void {
-		var currentObj = this.AuctionObjects[this.currentRound];
+		this.log("Begin Auction Round.")
+		var currentObj = this.auctionObjects[this.currentRound];
 		this.resetBids();
 		
 		this.socketHandler.emitRoundBegin(this.lobbyID, currentObj, this.maxBidTimeMS);
@@ -191,7 +200,7 @@ export class Game {
 		this.countdownTimerID = setTimeout(function() {
 			//Be extra safe? Timeout expires before everyone has bid!
 			if (tempThis.currentRound == roundID && tempThis.acceptingBids) {
-				console.log("round timeout")
+				this.log("round timeout")
 				tempThis.finishAuctionRound();
 			}
 		}, this.maxBidTimeMS);
@@ -227,6 +236,7 @@ export class Game {
 
 	//TODO MODIFY THIS TO EMIT PLAYER TO ASSIGN CAMPAIGN
 	private finishAuctionRound():void {
+		this.log("End Auction Round.")
 		this.acceptingBids = false;
 		clearTimeout(this.countdownTimerID);
 		
@@ -242,12 +252,12 @@ export class Game {
 		}
 		var bidResult = this.bidHandler.handleAuction(this.players, this.playerBids);
 		if (bidResult.bidIndex !== -1) {
-			this.players[bidResult.bidIndex].addObject(this.AuctionObjects[this.currentRound]);
+			this.players[bidResult.bidIndex].addObject(this.auctionObjects[this.currentRound]);
 		}         
 		                                              
-		console.log(JSON.stringify(bidResult));
+		this.log(JSON.stringify(bidResult));
 		
-		this.socketHandler.emitRoundFinish(this.lobbyID, this.visibilityHandler.getRoundFinishData(this.players, this.playerBids, bidResult, this.AuctionObjects[this.currentRound]));
+		this.socketHandler.emitRoundFinish(this.lobbyID, this.visibilityHandler.getRoundFinishData(this.players, this.playerBids, bidResult, this.auctionObjects[this.currentRound]));
 		this.socketHandler.emitPlayerDataUpdate(this.lobbyID, this.visibilityHandler.getPlayerData(this.players));
 		//Delay + next round UPDATE UI?
 		var tempThis = this;
@@ -303,7 +313,7 @@ export class Game {
 				return;
 			}
 
-			console.log("bid accepted " + index + " bid valuye " + bidValue);
+			this.log("bid accepted " + index + " bid valuye " + bidValue);
 			if (player.canPay(bidValue)) {
 				this.playerBids[index] = {bidTime:Date.now(), bidValue: bidValue};
 				this.socketHandler.emitBidSuccess(player.getSocket());
@@ -316,10 +326,43 @@ export class Game {
 				this.finishAuctionRound();
 			}
 		} else {
-			console.log("?????? who are you???")
+			this.log("?????? who are you???")
 		}
 	}
 
+	// New option - raise funds
+	public onPlayerFinance(playerID:string): void {
+		var index:number = this.getPlayerIndex(playerID);
+		if (index != -1) {
+			var player:Player = this.players[index];
+			
+			//TODO Change from static 10
+			player.addMoney(10);
+
+			this.playerBids[index] = {bidTime:Date.now(), bidValue: 0};
+			this.socketHandler.emitBidSuccess(player.getSocket());
+		
+		} else {
+			this.log("?????? who are you???")
+		}
+	}
+
+
+	// New option - raise funds
+	public onPlayerResearch(playerID:string): void {
+		var index:number = this.getPlayerIndex(playerID);
+		if (index != -1) {
+			var player:Player = this.players[index];
+			
+			//TODO think about it.
+
+			this.playerBids[index] = {bidTime:Date.now(), bidValue: 0};
+			this.socketHandler.emitBidSuccess(player.getSocket());
+		
+		} else {
+			this.log("?????? who are you???")
+		}
+	}
 
 	public onPlayerCampaignSelect(playerID:string, campaignId:string) {
 		var index:number = this.getPlayerIndex(playerID);
@@ -331,7 +374,7 @@ export class Game {
 				//Assign campaign
 				var campaign:Campaign = this.findCampaignAndRemove(campaignId);
 				if (campaign == undefined) {
-					console.log("campaign not found");
+					this.log("campaign not found");
 					return;
 				}
 				this.players[index].addCampaign(campaign);
@@ -342,10 +385,10 @@ export class Game {
 				this.findNextCampaignSelector();
 
 			} else {
-				console.log("NOT YOUR TURN");
+				this.log("NOT YOUR TURN");
 			}			
 		} else {
-			console.log("?????? who are you???")
+			this.log("?????? who are you???")
 		}
 	}
 
@@ -359,7 +402,7 @@ export class Game {
 				//Assign campaign
 				var player = this.players[index];
 				if (player.getCampaigns().length == 0) {
-					console.log("CANT HAVE 0 CAMPAIGNS");
+					this.log("CANT HAVE 0 CAMPAIGNS");
 					return;
 				}
 
@@ -368,10 +411,10 @@ export class Game {
 					this.endCampaignRound();
 				}
 			} else {
-				console.log("NOT YOUR TURN");
+				this.log("NOT YOUR TURN");
 			}			
 		} else {
-			console.log("?????? who are you???")
+			this.log("?????? who are you???")
 		}
 	}
 
@@ -390,7 +433,7 @@ export class Game {
 			//Found
 			if (i != campaigns.length) {
 				let campaign = campaigns[i];
-				var currentObj = this.AuctionObjects[this.currentRound];
+				var currentObj = this.auctionObjects[this.currentRound];
 				if(campaign.assignObj(currentObj)) {
 					this.resolveCampaign(player, campaign, currentObj);
 				}
@@ -401,5 +444,11 @@ export class Game {
 	private resolveCampaign(player:Player, campaign:Campaign, obj:AuctionObject) {
 		player.addMoney(campaign.getSuccessValue());
 		player.addVP(campaign.getVP());
+	}
+
+	private log(message:string) {
+		if (this.SHOULD_LOG) {
+			console.log(message);
+		}
 	}
 }
