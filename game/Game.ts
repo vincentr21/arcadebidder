@@ -6,6 +6,7 @@ import {VISIBILITY_MODE_STANDARD, VISIBILITY_MODE_GOOGLE, BID_MODE_FIRST, BID_MO
 import {IOSocketHandler} from './IOSocketHandler'
 import {Campaign} from './Campaign'
 import {Requirement, IReq} from './Requirement'
+import {EventDetails} from './EventDetails'
 
 export interface INewPlayer {
 	username: string,
@@ -98,18 +99,27 @@ export class Game {
 		this.beginSeason();
 	}
 
+	private processAbilities(ev:GameEvent, evDetails:EventDetails) {
+
+		//MAY NEED TO EMIT hERE FOR UPDATE!
+	}
+
 	private beginSeason() {
 		if (this.season == this.MAX_SEASON) {
 			this.finishGame();
 			return;
 		}
 		this.log("Season begin.");
+
+		this.processAbilities(GameEvent.SEASON_START, undefined);
 		this.beginCampaignRound(0);
 	}
 
 	private finishSeason() {
 		this.log("Season end.");
 		// TODO PUNISH CAMPAIGN FAILURES
+
+		this.processAbilities(GameEvent.SEASON_END, undefined);
 		this.beginSeason();
 	}
 
@@ -127,6 +137,7 @@ export class Game {
 		for (var i = 0; i < this.NUM_RANDOM_CAMPAIGNS; i++) {
 			this.campaigns.push(this.generateRandomCampaign()) 
 		}
+
 		//Emit start.
 	}
 
@@ -185,11 +196,13 @@ export class Game {
 			return;
 		}
 		
+		
 		this.beginAuctionRound();
 	}
 
 	private beginAuctionRound():void {
 		this.log("Begin Auction Round.")
+		this.processAbilities(GameEvent.ROUND_START, undefined);
 		var currentObj = this.auctionObjects[this.currentRound];
 		this.resetBids();
 		
@@ -237,6 +250,7 @@ export class Game {
 	//TODO MODIFY THIS TO EMIT PLAYER TO ASSIGN CAMPAIGN
 	private finishAuctionRound():void {
 		this.log("End Auction Round.")
+		this.processAbilities(GameEvent.ROUND_END, undefined);
 		this.acceptingBids = false;
 		clearTimeout(this.countdownTimerID);
 		
@@ -253,6 +267,11 @@ export class Game {
 		var bidResult = this.bidHandler.handleAuction(this.players, this.playerBids);
 		if (bidResult.bidIndex !== -1) {
 			this.players[bidResult.bidIndex].addObject(this.auctionObjects[this.currentRound]);
+			this.processAbilities(GameEvent.WON_OBJECT, {
+				player:this.players[bidResult.bidIndex],
+				bidResult:bidResult,
+				auctionItem:this.auctionObjects[this.currentRound],
+			})
 		}         
 		                                              
 		this.log(JSON.stringify(bidResult));

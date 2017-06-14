@@ -1,7 +1,7 @@
 import { AuctionObject } from './AuctionObject';
 import {Campaign} from './Campaign'
 import {Requirement} from './Requirement'
-import {IAbility} from './Ability'
+import {Ability} from './Ability'
 export class Player {
 	private money:number;
 	private victoryPts:number;
@@ -10,7 +10,7 @@ export class Player {
 	private wonObjects:AuctionObject[];
 	private socket:object;
 	private campaigns:Campaign[];
-	private abilities:IAbility[];
+	private abilities:Ability[];
 
 	constructor (uniqueID:string, name:string, money:number, socket:object) {
 		this.username = name;
@@ -57,7 +57,7 @@ export class Player {
 		//this.victoryPts += obj.getValue();
 	}
 
-	addAbility(ability:IAbility) {
+	addAbility(ability:Ability) {
 		this.abilities.push(ability);
 	}
 

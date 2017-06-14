@@ -1,13 +1,14 @@
 import {Player} from './Player'
-
+import {EventDetails} from './EventDetails'
 // TODO DECIDE ON HOW TO HANDLE ONEVENT
 
 export interface IAbility {
-    onEvent();
+    onEvent(ev:GameEvent, evDetails:EventDetails);
     isPermanent():boolean;
     setOwner(player:Player): void;
     getName():string;
 }
+
 
 export abstract class Ability implements IAbility {
     protected owner:Player;
@@ -21,13 +22,15 @@ export abstract class Ability implements IAbility {
         return this.name;
     }
 
-    abstract onEvent();
+    abstract onEvent(ev:GameEvent,evDetails:EventDetails);
     abstract isPermanent():boolean;
 }
 
-export class TestAbility extends Ability  {
-    onEvent() {
-        this.owner.addMoney(10);
+export class TestSeasonStartAbility extends Ability  {
+    onEvent(ev:GameEvent, evDetails:EventDetails) {
+        if (ev == GameEvent.SEASON_START) {
+             this.owner.addMoney(10);
+        }
     }
     isPermanent():boolean {
         return false;
