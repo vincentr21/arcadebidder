@@ -1,4 +1,4 @@
-enum GameEvent {
+export enum GameEvent {
     WON_OBJECT,
     ROUND_START,
     ROUND_END,

@@ -4,4 +4,5 @@ import {Player} from './Player'
 export interface EventDetails {
     player:Player,
     auctionItem:AuctionObject,
+    bidResult:IBidResult,
 }

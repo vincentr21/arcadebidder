@@ -57,8 +57,10 @@ export class Player {
 		//this.victoryPts += obj.getValue();
 	}
 
-	addAbility(ability:Ability) {
-		this.abilities.push(ability);
+	addAbilities(abilities:Ability[]) {
+		for (let a of abilities) {
+			this.abilities.push(a);
+		}
 	}
 
 	canPay(bid:number):boolean {
@@ -82,5 +84,9 @@ export class Player {
 
 	getCampaigns():Campaign[] {
 		return this.campaigns;
+	}
+
+	getAbilities():Ability[] {
+		return this.abilities;
 	}
 }

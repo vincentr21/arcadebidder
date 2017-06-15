@@ -1,15 +1,20 @@
 import {Player} from './Player'
 import {EventDetails} from './EventDetails'
-// TODO DECIDE ON HOW TO HANDLE ONEVENT
+import {Campaign} from './Campaign'
+import {AuctionObject} from './AuctionObject'
+import {IReq} from './Requirement'
+import {GameEvent} from './GameEvent'
 
+//TBH I DONT NEED THIS RIGHT
 export interface IAbility {
     onEvent(ev:GameEvent, evDetails:EventDetails);
+    modifyValue(campaign:Campaign, auctionItem:AuctionObject):IReq; // Returns IReq of modification Ex. {red + 1, blue + 0, green +0 } etc.
     isPermanent():boolean;
     setOwner(player:Player): void;
     getName():string;
 }
 
-
+//This was supposed to be an adaptor class, impls methods + 
 export abstract class Ability implements IAbility {
     protected owner:Player;
     protected name:string;
@@ -22,8 +27,19 @@ export abstract class Ability implements IAbility {
         return this.name;
     }
 
-    abstract onEvent(ev:GameEvent,evDetails:EventDetails);
-    abstract isPermanent():boolean;
+    modifyValue(campaign:Campaign, auctionItem:AuctionObject):IReq {
+        return {
+            red:0,
+            blue:0,
+            green:0
+        };
+    }
+    onEvent(ev:GameEvent,evDetails:EventDetails) {
+
+    }
+    isPermanent():boolean {
+        return false;
+    }
 }
 
 export class TestSeasonStartAbility extends Ability  {
@@ -32,7 +48,17 @@ export class TestSeasonStartAbility extends Ability  {
              this.owner.addMoney(10);
         }
     }
+}
+
+export class TestGiveMoreRedAbility extends Ability  {
+    modifyValue(campaign:Campaign, auctionItem:AuctionObject):IReq {
+        return {
+            red: auctionItem.getValue().red > 0 ? 1 : 0, 
+            blue:0,
+            green:0
+        };
+    }
     isPermanent():boolean {
-        return false;
+        return true;
     }
 }

@@ -5,9 +5,9 @@ import { IVisibilityMode, GoogleVisibilityHandler, StandardVisibilityHandler } f
 import {VISIBILITY_MODE_STANDARD, VISIBILITY_MODE_GOOGLE, BID_MODE_FIRST, BID_MODE_SECOND, BID_MODE_HARDCORE} from './GameConstants'
 import {IOSocketHandler} from './IOSocketHandler'
 import {Campaign} from './Campaign'
-import {Requirement, IReq} from './Requirement'
+import {Requirement, IReq, addIReqs, zeroOut} from './Requirement'
 import {EventDetails} from './EventDetails'
-
+import {GameEvent} from './GameEvent'
 export interface INewPlayer {
 	username: string,
 	uniqueID: string,
@@ -102,6 +102,11 @@ export class Game {
 	private processAbilities(ev:GameEvent, evDetails:EventDetails) {
 
 		//MAY NEED TO EMIT hERE FOR UPDATE!
+		for (let player of this.players) {
+			for (let abil of player.getAbilities()){
+				abil.onEvent(ev, evDetails);
+			}
+		}
 	}
 
 	private beginSeason() {
@@ -110,15 +115,29 @@ export class Game {
 			return;
 		}
 		this.log("Season begin.");
-
+		this.resetPlayers();
 		this.processAbilities(GameEvent.SEASON_START, undefined);
 		this.beginCampaignRound(0);
 	}
 
+	private resetPlayers() {
+		for (let player of this.players) {
+			player.reset();	
+		}
+	}
+
 	private finishSeason() {
 		this.log("Season end.");
-		// TODO PUNISH CAMPAIGN FAILURES
-
+		for (let player of this.players) {
+			var campaigns = player.getCampaigns();
+			for (let campaign of campaigns) {
+				if (!campaign.isComplete()) {
+					player.addMoney(campaign.getFailureValue());
+					player.addAbilities(campaign.getFailureAbilities());
+				}
+			}
+		}
+		//Emit any updates/final results?
 		this.processAbilities(GameEvent.SEASON_END, undefined);
 		this.beginSeason();
 	}
@@ -176,6 +195,8 @@ export class Game {
 		}
 		return true;
 	}
+
+	//TODO FIX THIS
 	private generateRandomCampaign():Campaign {
 		return new Campaign(this.generateRandomRequirement(), 5, 5, 5);
 	}
@@ -453,7 +474,15 @@ export class Game {
 			if (i != campaigns.length) {
 				let campaign = campaigns[i];
 				var currentObj = this.auctionObjects[this.currentRound];
-				if(campaign.assignObj(currentObj)) {
+
+				var modifiedValue = JSON.parse(JSON.stringify(currentObj.getValue()));
+				for (let abil of player.getAbilities()){
+					modifiedValue = addIReqs(modifiedValue, abil.modifyValue(campaign, currentObj));
+				}
+
+				modifiedValue = zeroOut(modifiedValue);
+
+				if(campaign.assignObj(currentObj, modifiedValue)) {
 					this.resolveCampaign(player, campaign, currentObj);
 				}
 			}
@@ -463,6 +492,7 @@ export class Game {
 	private resolveCampaign(player:Player, campaign:Campaign, obj:AuctionObject) {
 		player.addMoney(campaign.getSuccessValue());
 		player.addVP(campaign.getVP());
+		player.addAbilities(campaign.getSuccessAbilities());
 	}
 
 	private log(message:string) {

@@ -1,6 +1,6 @@
-import {Requirement} from './Requirement'
+import {Requirement, IReq} from './Requirement'
 import { AuctionObject } from './AuctionObject';
-
+import {Ability} from './Ability'
 export class Campaign {
     req:Requirement
     completeValue:number
@@ -9,11 +9,16 @@ export class Campaign {
     name:string
     desc:string
     id:string //Some id instead of number is better.
+
     objs:AuctionObject[];
+    modifiedVals:IReq[]; //TODO GROUP THESE TWO
+
     completed:boolean;
     victoryPts:number;
+    successAbilities:Ability[];
+    failureAbilities:Ability[];
 
-    constructor(req:Requirement, cValue:number, fValue:number, vp:number) {
+    constructor(req:Requirement, cValue:number, fValue:number, vp:number, sAbilities:Ability[], fAbilities:Ability[]) {
         this.req = req
         this.completeValue = cValue
         this.failValue = fValue
@@ -22,6 +27,8 @@ export class Campaign {
         this.objs = [];
         this.completed = false;
         this.victoryPts = vp;
+        this.successAbilities = sAbilities;
+        this.failureAbilities = fAbilities;
     }
 
     private generateRandomString():string {
@@ -39,9 +46,11 @@ export class Campaign {
     }
     // IGNORE OVERFLOW FOR NOW
     //return true for just completed,false otherwise
-    public assignObj(obj:AuctionObject):boolean {
+    public assignObj(obj:AuctionObject, modifiedValue:IReq):boolean {
         this.objs.push(obj);
-        this.req.subtract(obj.getValue());
+        this.modifiedVals.push(modifiedValue);
+        
+        this.req.subtract(modifiedValue);
         if (!this.completed && this.req.isComplete()) {
             this.completed = true;
             return true;
@@ -51,5 +60,17 @@ export class Campaign {
 
     public isComplete() {
         return this.completed;
+    }
+
+    public getSuccessAbilities():Ability[] {
+        return this.successAbilities;
+    }
+
+    public getFailureAbilities():Ability[] {
+        return this.failureAbilities;
+    }
+
+    public getFailureValue():number {
+        return -this.failValue;
     }
 }

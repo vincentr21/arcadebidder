@@ -28,3 +28,18 @@ export class Requirement {
         return true;
     }
 }
+
+export function addIReqs(ireq1:IReq, ireq2:IReq):IReq {
+    return {
+        red:ireq1.red + ireq2.red,
+        blue:ireq1.blue + ireq2.blue,
+        green:ireq1.green + ireq2.green,
+    };
+}
+export function zeroOut(ir:IReq):IReq {
+    return {
+        red:Math.max(0, ir.red),
+        blue:Math.max(0, ir.blue),
+        green:Math.max(0, ir.green),
+    }
+}
