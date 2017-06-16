@@ -8,6 +8,8 @@ import {Campaign} from './Campaign'
 import {Requirement, IReq, addIReqs, zeroOut} from './Requirement'
 import {EventDetails} from './EventDetails'
 import {GameEvent} from './GameEvent'
+import {TestSeasonStartAbility, TestRoundStartAbility} from './Ability'
+
 export interface INewPlayer {
 	username: string,
 	uniqueID: string,
@@ -198,7 +200,7 @@ export class Game {
 
 	//TODO FIX THIS
 	private generateRandomCampaign():Campaign {
-		return new Campaign(this.generateRandomRequirement(), 5, 5, 5);
+		return new Campaign(this.generateRandomRequirement(), 5, 5, 5, [new TestSeasonStartAbility()], []);
 	}
 
 	private generateRandomRequirement():Requirement {
@@ -395,7 +397,7 @@ export class Game {
 			var player:Player = this.players[index];
 			
 			//TODO think about it.
-
+			player.addAbilities([new TestRoundStartAbility]);
 			this.playerBids[index] = {bidTime:Date.now(), bidValue: 0};
 			this.socketHandler.emitBidSuccess(player.getSocket());
 		

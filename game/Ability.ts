@@ -14,6 +14,15 @@ export interface IAbility {
     getName():string;
 }
 
+//Emitted by an ability
+export interface IEmitAbility {
+    name:string,
+    onEventDesc:string,
+    onModifyValueDesc:string,
+    id: string, // Player owner id.
+    isPermanent: boolean
+}
+
 //This was supposed to be an adaptor class, impls methods + 
 export abstract class Ability implements IAbility {
     protected owner:Player;
@@ -43,6 +52,7 @@ export abstract class Ability implements IAbility {
 }
 
 export class TestSeasonStartAbility extends Ability  {
+    constructor(){super("SeasonStart")}
     onEvent(ev:GameEvent, evDetails:EventDetails) {
         if (ev == GameEvent.SEASON_START) {
              this.owner.addMoney(10);
@@ -50,7 +60,17 @@ export class TestSeasonStartAbility extends Ability  {
     }
 }
 
+export class TestRoundStartAbility extends Ability  {
+    constructor(){super("RoundSTart")}
+    onEvent(ev:GameEvent, evDetails:EventDetails) {
+        if (ev == GameEvent.ROUND_START) {
+             this.owner.addMoney(10);
+        }
+    }
+}
+
 export class TestGiveMoreRedAbility extends Ability  {
+    constructor(){super("MoreRed")}
     modifyValue(campaign:Campaign, auctionItem:AuctionObject):IReq {
         return {
             red: auctionItem.getValue().red > 0 ? 1 : 0, 
